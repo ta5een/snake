@@ -29,6 +29,7 @@ pub struct Game {
 }
 
 impl Game {
+    /// Initialises a new game.
     pub fn new(width: i32, height: i32) -> Game {
         Game {
             snake: Snake::new(2, 2),
@@ -46,14 +47,16 @@ impl Game {
         }
     }
 
+    /// Responsible for detecting key presses and taking their prescribed actions if applicable.
     pub fn key_pressed(&mut self, key: Key) {
         // If the game is over, do nothing:
         if self.game_over {
             return;
         }
 
-        if key.code() == 0x20 {
-            self.pause_unpause_game();
+        // If the user presses the Space key, the game will pause/unpause:
+        if key.code() == Key::Space.code() {
+            self.pause_resume();
         }
 
         // Map the keys to a direction, other keys will be ignored:
@@ -62,10 +65,12 @@ impl Game {
             Key::S => Some(Direction::Down),
             Key::A => Some(Direction::Left),
             Key::D => Some(Direction::Right),
+
             Key::Up => Some(Direction::Up),
             Key::Down => Some(Direction::Down),
             Key::Left => Some(Direction::Left),
             Key::Right => Some(Direction::Right),
+
             _ => Some(self.snake.head_direction())
         };
 
@@ -77,6 +82,7 @@ impl Game {
         self.update_snake(dir);
     }
 
+    /// Responsible for drawing the blocks in the game.
     pub fn draw(&self, con: &Context, g: &mut G2d) {
         self.snake.draw(con, g);
 
@@ -95,6 +101,7 @@ impl Game {
         }
     }
 
+    /// Responsible for updating all the blocks in the game.
     pub fn update(&mut self, delta_time: f64) {
         self.waiting_time += delta_time;
 
@@ -118,6 +125,7 @@ impl Game {
         }
     }
 
+    /// Checks to see if the snake has eaten an apple.
     fn has_eaten(&mut self) {
         let (head_x, head_y): (i32, i32) = self.snake.head_position();
 
@@ -127,6 +135,7 @@ impl Game {
         }
     }
 
+    /// Checks to see if the snake is alive.
     fn is_snake_alive(&self, dir: Option<Direction>) -> bool {
         let (next_x, next_y) = self.snake.next_head(dir);
 
@@ -139,6 +148,7 @@ impl Game {
         next_x > 0 && next_y > 0 && next_x < self.width - 1 && next_y < self.height - 1
     }
 
+    /// Adds an apple to the screen.
     fn add_apple(&mut self) {
         let mut rng = thread_rng();
 
@@ -158,6 +168,7 @@ impl Game {
         self.apple_exists = true;
     }
 
+    /// Updates the direction and position of the snake.
     fn update_snake(&mut self, dir: Option<Direction>) {
         if self.is_snake_alive(dir) {
             if !self.paused {
@@ -171,10 +182,12 @@ impl Game {
         self.waiting_time = 0.0;
     }
 
-    fn pause_unpause_game(&mut self) {
+    /// Switches between pausing and resuming the game depending on current game state.
+    fn pause_resume(&mut self) {
         self.paused = !self.paused;
     }
 
+    /// Restarts the game with set properties.
     fn restart(&mut self) {
         self.snake = Snake::new(2, 2);
 

@@ -99,10 +99,6 @@ impl Snake {
         self.tail = Some(removed_block);
     }
 
-//    pub fn freeze(&mut self) {
-//        self.move_forward(dir);
-//    }
-
     /// Gets the direction the snake is moving in.
     pub fn head_direction(&self) -> Direction {
         self.direction
