@@ -53,6 +53,10 @@ impl Snake {
         }
     }
 
+    pub fn get_length(&self) -> usize {
+        self.body.len()
+    }
+
     /// Draws the snake.
     pub fn draw(&self, con: &Context, g: &mut G2d) {
         for block in &self.body {

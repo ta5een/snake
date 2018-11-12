@@ -15,6 +15,7 @@ const RESTART_TIME: f64 = 1.5;
 
 pub struct Game {
     snake: Snake,
+    level: i32,
 
     apple_exists: bool,
     apple_x: i32,
@@ -33,6 +34,7 @@ impl Game {
     pub fn new(width: i32, height: i32) -> Game {
         Game {
             snake: Snake::new(2, 2),
+            level: 1,
 
             apple_exists: true,
             apple_x: 6,
@@ -132,6 +134,7 @@ impl Game {
         if self.apple_exists && head_x == self.apple_x && head_y == self.apple_y {
             self.apple_exists = false;
             self.snake.grow_tail();
+            self.up_level();
         }
     }
 
@@ -182,6 +185,11 @@ impl Game {
         self.waiting_time = 0.0;
     }
 
+    fn up_level(&mut self) {
+        self.level += 1;
+        println!("* Level: {}, Length: {}", self.level, self.snake.get_length());
+    }
+
     /// Switches between pausing and resuming the game depending on current game state.
     fn pause_resume(&mut self) {
         self.paused = !self.paused;
@@ -190,6 +198,7 @@ impl Game {
     /// Restarts the game with set properties.
     fn restart(&mut self) {
         self.snake = Snake::new(2, 2);
+        self.level = 1;
 
         self.apple_exists = true;
         self.apple_x = 6;

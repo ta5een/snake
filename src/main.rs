@@ -25,6 +25,7 @@ fn main() {
         .unwrap();
 
     println!("Starting `{}`", window.get_title());
+    println!("* Level: 1, Length: 3");
 
     // Set game bounds to window size:
     let mut game = Game::new(width, height);
