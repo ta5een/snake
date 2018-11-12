@@ -7,8 +7,8 @@ pub fn to_coord(game_coord: i32) -> f64 {
     (game_coord as f64) * BLOCK_SIZE
 }
 
-// &con.transform
-// ^ should be `con.transform`
+// `&con.transform`
+// ^ should be `con.transform`?
 pub fn draw_block(colour: Color, x: i32, y: i32, con: &Context, g: &mut G2d) {
     let gui_x = to_coord(x);
     let gui_y = to_coord(y);
@@ -21,8 +21,8 @@ pub fn draw_block(colour: Color, x: i32, y: i32, con: &Context, g: &mut G2d) {
     );
 }
 
-// &con.transform
-// ^ should be `con.transform`
+// `&con.transform`
+// ^ should be `con.transform`?
 pub fn draw_rect(
     colour: Color,
     x: i32,
