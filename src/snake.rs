@@ -4,7 +4,7 @@ use piston_window::types::Color;
 
 use draw::draw_block;
 
-const SNAKE_COLOUR: Color = [0.0, 0.8, 0.1, 1.0];
+const SNAKE_COLOUR: Color = [0.4, 0.8, 0.2, 1.0];
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Direction {

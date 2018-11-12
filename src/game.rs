@@ -6,8 +6,8 @@ use rand::{thread_rng, Rng};
 use snake::{Direction, Snake};
 use draw::{draw_block, draw_rect};
 
-const APPLE_COLOUR: Color = [0.8, 0.0, 0.0, 1.0];
-const BORDER_COLOUR: Color = [0.0, 0.0, 0.0, 1.0];
+const APPLE_COLOUR: Color = [0.9, 0.0, 0.2, 1.0];
+const BORDER_COLOUR: Color = [0.15, 0.15, 0.15, 1.0];
 const GAMEOVER_COLOUR: Color = [0.9, 0.0, 0.0, 0.5];
 
 const MOVING_PERIOD: f64 = 0.1;
