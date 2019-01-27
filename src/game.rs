@@ -6,12 +6,17 @@ use rand::{thread_rng, Rng};
 use snake::{Direction, Snake};
 use draw::{draw_block, draw_rect};
 
-const APPLE_COLOUR: Color = [0.9, 0.0, 0.2, 1.0];
-const BORDER_COLOUR: Color = [0.15, 0.15, 0.15, 1.0];
-const GAMEOVER_COLOUR: Color = [0.9, 0.0, 0.0, 0.5];
+const COLOUR_BORDER: Color = [0.15, 0.15, 0.15, 1.0];
+const COLOUR_CLEAR: Color = [0.0, 0.0, 0.0, 0.0];
+const COLOUR_APPLE: Color = [0.9, 0.0, 0.2, 1.0];
+const COLOUR_GAMEOVER: Color = [0.72, 0.09, 0.09, 0.5];
+const COLOUR_PAUSE: Color = [0.16, 0.27, 0.34, 0.5];
 
 const MOVING_PERIOD: f64 = 0.1;
-const RESTART_TIME: f64 = 1.5;
+const RESTART_TIME: f64 = 3.0;
+
+const SCREEN_MAX_HEIGHT: f64 = 765.0;
+const SCREEN_MAX_WIDTH: f64 = 750.0;
 
 pub struct Game {
     snake: Snake,
@@ -32,13 +37,16 @@ pub struct Game {
 impl Game {
     /// Initialises a new game.
     pub fn new(width: i32, height: i32) -> Game {
+        let snake = Snake::new(2, 2);
+        let (apple_x, apple_y) = Self::randomise_apple_location(&snake, width, height);
+
         Game {
-            snake: Snake::new(2, 2),
-            level: 1,
+            snake,
+            level: 0,
 
             apple_exists: true,
-            apple_x: 6,
-            apple_y: 4,
+            apple_x,
+            apple_y,
 
             width,
             height,
@@ -57,7 +65,7 @@ impl Game {
         }
 
         // If the user presses the Space key, the game will pause/unpause:
-        if key.code() == Key::Space.code() {
+        if key == Key::Space {
             self.pause_resume();
         }
 
@@ -85,21 +93,64 @@ impl Game {
     }
 
     /// Responsible for drawing the blocks in the game.
-    pub fn draw(&self, con: &Context, g: &mut G2d) {
+    pub fn draw(&self, con: &Context, g: &mut G2d, glyphs: &mut Glyphs) {
         self.snake.draw(con, g);
 
         if self.apple_exists {
-            draw_block(APPLE_COLOUR, self.apple_x, self.apple_y, con, g);
+            draw_block(COLOUR_APPLE, self.apple_x, self.apple_y, con, g);
         }
 
-        // TOP, RIGHT, BOTTOM, LEFT Borders:
-        draw_rect(BORDER_COLOUR, 0, 0, self.width, 1, con, g);
-        draw_rect(BORDER_COLOUR, self.width - 1, 0, 1, self.height, con, g);
-        draw_rect(BORDER_COLOUR, 0, self.height - 1, self.width, 1, con, g);
-        draw_rect(BORDER_COLOUR, 0, 0, 1, self.height, con, g);
+        // TOP, RIGHT, BOTTOM, LEFT borders:
+        draw_rect(COLOUR_BORDER, 0, 0, self.width, 1, con, g);
+        draw_rect(COLOUR_BORDER, self.width - 1, 0, 1, self.height, con, g);
+        draw_rect(COLOUR_BORDER, 0, self.height - 1, self.width, 1, con, g);
+        draw_rect(COLOUR_BORDER, 0, 0, 1, self.height, con, g);
 
         if self.game_over {
-            draw_rect(GAMEOVER_COLOUR, 0, 0, self.width, self.height, con, g);
+            draw_rect(COLOUR_GAMEOVER, 0, 0, self.width, self.height, con, g);
+            Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
+                "Oh no! You died!",
+                glyphs,
+                &con.draw_state,
+                con.transform.trans(170.0, 300.0),
+                g
+            ).unwrap();
+            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
+                format!("You're score was {}", self.level).as_str(),
+                glyphs,
+                &con.draw_state,
+                con.transform.trans(280.0, 340.0),
+                g
+            ).unwrap();
+        }
+
+        if self.paused {
+            draw_rect(COLOUR_PAUSE, 0, 0, self.width, self.height, con, g);
+
+            Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
+                "PAUSED",
+                glyphs,
+                &con.draw_state,
+                con.transform.trans(290.0, 300.0),
+                g
+            ).unwrap();
+            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
+                "Press SPACE to resume game",
+                glyphs,
+                &con.draw_state,
+                con.transform.trans(240.0, 340.0),
+                g
+            ).unwrap();
+
+            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
+                "ABC",
+                glyphs,
+                &con.draw_state,
+                con.transform.trans(SCREEN_MAX_WIDTH, SCREEN_MAX_HEIGHT),
+                g
+            ).unwrap();
+        } else {
+            draw_rect(COLOUR_CLEAR, 0, 0, self.width, self.height, con, g);
         }
     }
 
@@ -129,7 +180,7 @@ impl Game {
 
     /// Checks to see if the snake has eaten an apple.
     fn has_eaten(&mut self) {
-        let (head_x, head_y): (i32, i32) = self.snake.head_position();
+        let (head_x, head_y) = self.snake.head_position();
 
         if self.apple_exists && head_x == self.apple_x && head_y == self.apple_y {
             self.apple_exists = false;
@@ -151,19 +202,29 @@ impl Game {
         next_x > 0 && next_y > 0 && next_x < self.width - 1 && next_y < self.height - 1
     }
 
-    /// Adds an apple to the screen.
-    fn add_apple(&mut self) {
+    /// Randomise location of apple.
+    fn randomise_apple_location(snake: &Snake, width: i32, height: i32) -> (i32, i32) {
         let mut rng = thread_rng();
 
         // Set random thread's range dimensions:
-        let mut new_x = rng.gen_range(1, self.width - 1);
-        let mut new_y = rng.gen_range(1, self.height - 1);
+        let mut new_x = rng.gen_range(1, width - 1);
+        let mut new_y = rng.gen_range(1, height - 1);
 
         // Prevent apple from spawning on the snake:
-        while self.snake.is_overlapping(new_x, new_y) {
-            new_x = rng.gen_range(1, self.width - 1);
-            new_y = rng.gen_range(1, self.height - 1);
+        while snake.is_overlapping(new_x, new_y) {
+            new_x = rng.gen_range(1, width - 1);
+            new_y = rng.gen_range(1, height - 1);
         }
+
+        (new_x, new_y)
+    }
+
+    /// Adds an apple to the screen.
+    fn add_apple(&mut self) {
+        let (new_x, new_y) = Self::randomise_apple_location(
+            &self.snake,
+            self.width,
+            self.height);
 
         // Set the coordinates of the new apple:
         self.apple_x = new_x;
@@ -190,19 +251,24 @@ impl Game {
         println!("* Level: {}, Length: {}", self.level, self.snake.get_length());
     }
 
-    /// Switches between pausing and resuming the game depending on current game state.
+    /// Toggles between pausing and resuming the game depending on current game state.
     fn pause_resume(&mut self) {
         self.paused = !self.paused;
     }
 
     /// Restarts the game with set properties.
     fn restart(&mut self) {
+        let (apple_x, apple_y) = Self::randomise_apple_location(
+            &self.snake,
+            self.width,
+            self.height);
+
         self.snake = Snake::new(2, 2);
         self.level = 1;
 
         self.apple_exists = true;
-        self.apple_x = 6;
-        self.apple_y = 4;
+        self.apple_x = apple_x;
+        self.apple_y = apple_y;
 
         self.game_over = false;
         self.paused = false;

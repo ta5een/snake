@@ -11,7 +11,7 @@ use piston_window::types::Color;
 use game::Game;
 use draw::to_coord_u32;
 
-const BKGRND_CLR: Color = [0.5, 0.5, 0.5, 1.0];
+const BG_COLOUR: Color = [0.5, 0.5, 0.5, 1.0];
 
 fn main() {
     let (width, height) = (30, 30);
@@ -30,6 +30,13 @@ fn main() {
     // Set game bounds to window size:
     let mut game = Game::new(width, height);
 
+    use std::path::Path;
+    let font = Path::new("assets/mononoki.ttf");
+    let factory = window.factory.clone();
+    let settings= TextureSettings::new();
+
+    let mut glyphs = Glyphs::new(font, factory, settings).unwrap();
+
     // Set window events:
     while let Some(event) = window.next() {
         if let Some(Button::Keyboard(key)) = event.press_args() {
@@ -37,8 +44,8 @@ fn main() {
         }
 
         window.draw_2d(&event, |c, g| {
-           clear(BKGRND_CLR, g);
-            game.draw(&c, g);
+            clear(BG_COLOUR, g);
+            game.draw(&c, g, &mut glyphs);
         });
 
         event.update(|arg| {
