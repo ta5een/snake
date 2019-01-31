@@ -27,7 +27,7 @@ fn main() {
     println!("Starting `{}`", window.get_title());
     println!("* Level: 0, Length: 3");
 
-    // Set game bounds to window size:
+    // Setting the game bounds to window size:
     let mut game = Game::new(width, height);
 
     use std::path::Path;
@@ -37,7 +37,7 @@ fn main() {
 
     let mut glyphs = Glyphs::new(font, factory, settings).unwrap();
 
-    // Set window events:
+    // Setting the window events:
     while let Some(event) = window.next() {
         if let Some(Button::Keyboard(key)) = event.press_args() {
             game.key_pressed(key);

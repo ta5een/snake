@@ -67,8 +67,6 @@ impl Snake {
     /// Determines the position of the head.
     pub fn head_position(&self) -> (i32, i32) {
         let head_block = self.body.front().unwrap();
-            // We used `unwrap()` here to let us get rid of the Option<T> enum without explicitly
-            // writing some error handling
 
         (head_block.x, head_block.y)
     }
@@ -85,11 +83,13 @@ impl Snake {
 
         // Match the snake direction:
         let new_block = match self.direction {
+
             // The reason why the y-values seem inverted is because we are looking at the y-axis as
             // a range of positive values. For example, in a screen with dimensions 600x400, the
             // top-right corner would be origin (0, 0), and the bottom-left corner would be the max
             // y and min x-values, i.e. (0, 600). As a result, this shows that the snake going
             // upwards is really DECREMENTING in its y-value (say from 200 to 100).
+
             Direction::Up => Block { x: last_x, y: last_y - 1 },
             Direction::Down => Block { x: last_x, y: last_y + 1 },
             Direction::Left => Block { x: last_x - 1, y: last_y },
@@ -105,9 +105,9 @@ impl Snake {
 
     /// Gets the direction the snake is moving in.
     pub fn head_direction(&self) -> Direction {
+        // We were required to derive the `Copy` & `Clone` traits for Direction to allow `self`
+        // to move out of the borrowed content, (i.e. the direction of the snake in this case).
         self.direction
-            // We were required to derive the `Copy` & `Clone` traits for Direction to allow `self`
-            // to move out of the borrowed content, (i.e. the direction of the snake in this case).
     }
 
     /// Gets the next head coordinates according to the current direction the snake is moving in.
@@ -132,9 +132,8 @@ impl Snake {
         }
     }
 
-    /// Makes the snake's tail grow once it eats an apple.
-    ///
-    /// The tail will be rendered at the very end of the `ListList<Block>` (i.e. the snake).
+    /// Makes the snake's tail grow once it eats an apple. The tail will be rendered at the very end
+    /// of the `LinkedList<Block>` (i.e. the body of snake).
     pub fn grow_tail(&mut self) {
         let block = self.tail.clone().unwrap();
         self.body.push_back(block);
