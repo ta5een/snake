@@ -129,16 +129,6 @@ impl Game {
             draw_rect(COLOUR_GAMEOVER, 0, 0, self.width, self.height, con, g);
             add_text!("Oh no! You died!", WHITE, 40, 170.0, 300.0);
             add_text!(format!("You're score was {}", self.level).as_str(), WHITE, 15, 280.0, 340.0);
-
-            // DEPRECIATED
-            // -----------
-            // Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
-            //     "Oh no! You died!",
-            //     glyphs,
-            //     &con.draw_state,
-            //     con.transform.trans(170.0, 300.0),
-            //     g
-            // ).unwrap();
         }
 
         if self.paused {
