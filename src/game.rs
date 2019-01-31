@@ -11,6 +11,7 @@ const COLOUR_CLEAR: Color = [0.0, 0.0, 0.0, 0.0];
 const COLOUR_APPLE: Color = [0.9, 0.0, 0.2, 1.0];
 const COLOUR_GAMEOVER: Color = [0.72, 0.09, 0.09, 0.5];
 const COLOUR_PAUSE: Color = [0.16, 0.27, 0.34, 0.5];
+const WHITE: Color = [1.0, 1.0, 1.0, 1.0];
 
 const MOVING_PERIOD: f64 = 0.1;
 const RESTART_TIME: f64 = 3.0;
@@ -106,49 +107,45 @@ impl Game {
         draw_rect(COLOUR_BORDER, 0, self.height - 1, self.width, 1, con, g);
         draw_rect(COLOUR_BORDER, 0, 0, 1, self.height, con, g);
 
+        /// Macro to add text to screen. Assumes parameters have the type (in order):
+        /// - text: `&str`
+        /// - colour: `Color` or `[f32; 4]`
+        /// - size: `FontSize` or `u32`
+        /// - x: `f32` or `f64`
+        /// - y: `f32` or `f64`
+        macro_rules! add_text {
+            ($text:expr, $colour:expr, $size:expr, $x:expr, $y:expr) => {
+                Text::new_color($colour, $size).draw(
+                    $text,
+                    glyphs,
+                    &con.draw_state,
+                    con.transform.trans($x, $y),
+                    g
+                ).unwrap();
+            };
+        }
+
         if self.game_over {
             draw_rect(COLOUR_GAMEOVER, 0, 0, self.width, self.height, con, g);
-            Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
-                "Oh no! You died!",
-                glyphs,
-                &con.draw_state,
-                con.transform.trans(170.0, 300.0),
-                g
-            ).unwrap();
-            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
-                format!("You're score was {}", self.level).as_str(),
-                glyphs,
-                &con.draw_state,
-                con.transform.trans(280.0, 340.0),
-                g
-            ).unwrap();
+            add_text!("Oh no! You died!", WHITE, 40, 170.0, 300.0);
+            add_text!(format!("You're score was {}", self.level).as_str(), WHITE, 15, 280.0, 340.0);
+
+            // DEPRECIATED
+            // -----------
+            // Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
+            //     "Oh no! You died!",
+            //     glyphs,
+            //     &con.draw_state,
+            //     con.transform.trans(170.0, 300.0),
+            //     g
+            // ).unwrap();
         }
 
         if self.paused {
             draw_rect(COLOUR_PAUSE, 0, 0, self.width, self.height, con, g);
-
-            Text::new_color([1.0, 1.0, 1.0, 1.0], 40).draw(
-                "PAUSED",
-                glyphs,
-                &con.draw_state,
-                con.transform.trans(290.0, 300.0),
-                g
-            ).unwrap();
-            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
-                "Press SPACE to resume game",
-                glyphs,
-                &con.draw_state,
-                con.transform.trans(240.0, 340.0),
-                g
-            ).unwrap();
-
-            Text::new_color([1.0, 1.0, 1.0, 1.0], 15).draw(
-                "ABC",
-                glyphs,
-                &con.draw_state,
-                con.transform.trans(SCREEN_MAX_WIDTH, SCREEN_MAX_HEIGHT),
-                g
-            ).unwrap();
+            add_text!("Paused", WHITE, 40, 290.0, 300.0);
+            add_text!("Press <SPACE> to resume game", WHITE, 15, 240.0, 340.0);
+            add_text!("ABC", WHITE, 15, SCREEN_MAX_WIDTH, SCREEN_MAX_HEIGHT);
         } else {
             draw_rect(COLOUR_CLEAR, 0, 0, self.width, self.height, con, g);
         }

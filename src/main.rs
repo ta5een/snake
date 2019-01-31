@@ -11,7 +11,7 @@ use piston_window::types::Color;
 use game::Game;
 use draw::to_coord_u32;
 
-const BG_COLOUR: Color = [0.5, 0.5, 0.5, 1.0];
+const COLOUR_BG: Color = [0.5, 0.5, 0.5, 1.0];
 
 fn main() {
     let (width, height) = (30, 30);
@@ -25,7 +25,7 @@ fn main() {
         .unwrap();
 
     println!("Starting `{}`", window.get_title());
-    println!("* Level: 1, Length: 3");
+    println!("* Level: 0, Length: 3");
 
     // Set game bounds to window size:
     let mut game = Game::new(width, height);
@@ -44,7 +44,7 @@ fn main() {
         }
 
         window.draw_2d(&event, |c, g| {
-            clear(BG_COLOUR, g);
+            clear(COLOUR_BG, g);
             game.draw(&c, g, &mut glyphs);
         });
 
